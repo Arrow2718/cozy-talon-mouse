@@ -30,6 +30,7 @@ unmap everything: user.flex_grid_unmap_point("")
 
 # Boxes
 boxes: user.flex_grid_find_boxes()
+box continuous: user.flex_grid_find_boxes_continuous()
 box <number>: user.flex_grid_go_to_box(number or 1, -1)
 box click <number>: user.flex_grid_go_to_box(number or 1, 0)
 box righty <number>: user.flex_grid_go_to_box(number or 1, 1)

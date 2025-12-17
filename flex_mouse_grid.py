@@ -15,8 +15,10 @@ from talon import (
     settings,
     screen,
 )
+from talon.ui import register, unregister
 from talon.skia import Paint, Rect, Image
 from talon.types.point import Point2d
+
 
 import typing
 import string
@@ -1079,7 +1081,7 @@ class FlexMouseGrid:
         self.boxes_showing = b
         self.grid_showing = g
 
-    def find_boxes(self):
+    def find_boxes(self, arg1=None, arg2=None):
         self.reset_window_context()
 
         # temporarily hide everything that we have drawn so that it doesn't interfere with box detection
@@ -1103,6 +1105,8 @@ class FlexMouseGrid:
         self.restore_everything()
         self.boxes_showing = True
         self.redraw()
+
+    
 
     def find_boxes_with_config(self, threshold, box_size_lower, box_size_upper):
         current_directory = os.path.dirname(__file__)
@@ -1156,6 +1160,8 @@ class FlexMouseGrid:
         ]
         # print("found boxes", len(self.boxes))
         self.box_config["threshold"] = process_output["threshold"]
+
+
 
     def go_to_box(self, box_number):
         if box_number >= len(self.boxes):
@@ -1229,6 +1235,7 @@ class FlexMouseGrid:
 mg = FlexMouseGrid()
 app.register("ready", mg.setup)
 
+continuous_boxes = False
 
 @mod.action_class
 class GridActions:
@@ -1395,7 +1402,30 @@ class GridActions:
     def flex_grid_find_boxes():
         """Find all boxes, label with hints"""
         mg.find_boxes()
-
+        
+    def flex_grid_find_boxes_continuous():
+        """Find all boxes, label with hints continuously"""
+        global continuous_boxes
+        
+        ui_update_types =["win_move","win_title","win_focus","win_workspace_change","win_resize"] 
+        
+        if continuous_boxes is True:
+            
+            continuous_boxes= False
+        else:
+            continuous_boxes= True
+        
+        if continuous_boxes is True:
+            print("registering")
+            [ register(update_type, mg.find_boxes ) for update_type in ui_update_types]
+        else:
+            print("unregistering")
+            [ unregister(update_type, mg.find_boxes ) for update_type in ui_update_types]
+            mg.toggle_boxes(onoff=False)
+            
+            #win_move, win_title, win_focus, win_workspace_change,  win_resize
+            
+        
     def flex_grid_box_config_lock(onoff: int):
         """Lock box config to prevent binary search"""
         mg.lock_box_config(True if onoff == 1 else False)
